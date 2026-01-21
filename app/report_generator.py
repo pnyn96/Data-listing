@@ -13,7 +13,7 @@ INSTRUCTION_BUCKET = os.environ["INSTRUCTION_BUCKET"]
 SOURCE_DATA_BUCKET = os.environ["SOURCE_DATA_BUCKET"]
 SOURCE_DATA_KEY = os.environ["SOURCE_DATA_KEY"]
 
-def generate_reports(event):
+def generate_report(event):
     # JSON uploaded bucket & key (triggering bucket)
     json_key = event["Records"][0]["s3"]["object"]["key"]
 
