@@ -13,10 +13,10 @@ phases:
   build:
     commands:
       - echo Building Docker image...
-      - docker build -t capstone-1:v3 .
+      - docker build -t capstone-1:latest1 .
 
   post_build:
     commands:
       - echo Pushing image to ECR...
-      - docker tag capstone-1:latest $ECR_REPO_URI:latest
-      - docker push $ECR_REPO_URI:v3
+      - docker tag capstone-1:latest $ECR_REPO_URI:latest1
+      - docker push $ECR_REPO_URI:latest1
