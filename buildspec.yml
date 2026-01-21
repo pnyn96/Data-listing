@@ -8,9 +8,9 @@ phases:
 
   build:
     commands:
-      - docker build -t report-generator:latest .
+      - docker build -t capstone-1:latest .
 
   post_build:
     commands:
-      - docker tag report-generator:latest $ECR_REPO_URI:latest
+      - docker tag capstone-1:latest $ECR_REPO_URI:latest
       - docker push $ECR_REPO_URI:latest
