@@ -1,0 +1,16 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - aws ecr get-login-password --region $AWS_REGION |
+        docker login --username AWS --password-stdin $ECR_REPO_URI
+
+  build:
+    commands:
+      - docker build -t report-generator:latest .
+
+  post_build:
+    commands:
+      - docker tag report-generator:latest $ECR_REPO_URI:latest
+      - docker push $ECR_REPO_URI:latest
