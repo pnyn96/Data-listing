@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from app.s3_reader import read_json, read_csv
 from app.html_generator import generate_html
@@ -7,21 +8,24 @@ from app.pdf_generator import generate_pdf
 from app.xml_generator import generate_xml
 from app.salesforce_uploader import upload_to_salesforce
 
-SOURCE_DATA_BUCKET = "source-data-bucket"
-SOURCE_DATA_KEY = "salesforce/data.csv"
+# ✅ Read configuration from Lambda environment variables
+INSTRUCTION_BUCKET = os.environ["INSTRUCTION_BUCKET"]
+SOURCE_DATA_BUCKET = os.environ["SOURCE_DATA_BUCKET"]
+SOURCE_DATA_KEY = os.environ["SOURCE_DATA_KEY"]
 
 def generate_reports(event):
-    bucket = event["Records"][0]["s3"]["bucket"]["name"]
+    # JSON uploaded bucket & key (triggering bucket)
     json_key = event["Records"][0]["s3"]["object"]["key"]
 
-    instructions = read_json(bucket, json_key)
+    # 1️⃣ Read JSON instructions
+    instructions = read_json(INSTRUCTION_BUCKET, json_key)
     requested_outputs = instructions.get("additional_outputs", [])
 
-    # Read data
+    # 2️⃣ Read source data
     data_bytes = read_csv(SOURCE_DATA_BUCKET, SOURCE_DATA_KEY)
     df = pd.read_csv(pd.io.common.BytesIO(data_bytes))
 
-    # Apply rules
+    # 3️⃣ Apply rules
     if "filter" in instructions:
         df = df.query(instructions["filter"])
 
@@ -44,7 +48,7 @@ def generate_reports(event):
     if "xml" in requested_outputs:
         generated_files.append(generate_xml(df))
 
-    # Upload all files
+    # 4️⃣ Upload generated files back to Salesforce
     for file in generated_files:
         upload_to_salesforce(file, instructions["record_id"])
 
