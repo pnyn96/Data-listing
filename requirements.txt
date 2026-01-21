@@ -1,0 +1,7 @@
+boto3
+pandas
+openpyxl
+xlsxwriter
+reportlab
+requests
+python-dateutil
