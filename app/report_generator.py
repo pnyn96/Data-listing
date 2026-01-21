@@ -14,18 +14,21 @@ SOURCE_DATA_BUCKET = os.environ["SOURCE_DATA_BUCKET"]
 SOURCE_DATA_KEY = os.environ["SOURCE_DATA_KEY"]
 
 def generate_report(event):
-    # JSON uploaded bucket & key (triggering bucket)
-    json_key = event["Records"][0]["s3"]["object"]["key"]
+    print("Starting report generation")
 
-    # 1️⃣ Read JSON instructions
+    # 1️⃣ Get JSON key from S3 event
+    json_key = event["Records"][0]["s3"]["object"]["key"]
+    print(f"JSON file received: {json_key}")
+
+    # 2️⃣ Read JSON instructions
     instructions = read_json(INSTRUCTION_BUCKET, json_key)
     requested_outputs = instructions.get("additional_outputs", [])
 
-    # 2️⃣ Read source data
+    # 3️⃣ Read source data
     data_bytes = read_csv(SOURCE_DATA_BUCKET, SOURCE_DATA_KEY)
     df = pd.read_csv(pd.io.common.BytesIO(data_bytes))
 
-    # 3️⃣ Apply rules
+    # 4️⃣ Apply rules
     if "filter" in instructions:
         df = df.query(instructions["filter"])
 
@@ -48,9 +51,11 @@ def generate_report(event):
     if "xml" in requested_outputs:
         generated_files.append(generate_xml(df))
 
-    # 4️⃣ Upload generated files back to Salesforce
-    for file in generated_files:
-        upload_to_salesforce(file, instructions["record_id"])
+    # 5️⃣ Upload generated files back to Salesforce
+    for file_path in generated_files:
+        upload_to_salesforce(file_path, instructions["record_id"])
+
+    print("Report generation completed")
 
     return {
         "status": "SUCCESS",
