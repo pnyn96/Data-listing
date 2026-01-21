@@ -1,4 +1,4 @@
-from app.report_generator import generate_reports
+from app.report_generator import generate_report
 
 def handler(event, context):
-    return generate_reports(event)
+    return generate_report(event)
