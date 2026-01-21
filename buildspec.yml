@@ -3,14 +3,20 @@ version: 0.2
 phases:
   pre_build:
     commands:
+      - echo AWS_REGION=$AWS_REGION
+      - echo ECR_REPO_URI=$ECR_REPO_URI
+      - aws --version
+      - docker --version
       - aws ecr get-login-password --region $AWS_REGION |
         docker login --username AWS --password-stdin $ECR_REPO_URI
 
   build:
     commands:
+      - echo Building Docker image...
       - docker build -t capstone-1:latest .
 
   post_build:
     commands:
+      - echo Pushing image to ECR...
       - docker tag capstone-1:latest $ECR_REPO_URI:latest
       - docker push $ECR_REPO_URI:latest
